@@ -22,14 +22,14 @@ TEMPLATE = """
 ____  
   
 #### ℹ️ **App Info**  
-**Age**: {age}.  
 **Category**: {category}.  
+**Last Update**: {last_update}.  
 **Platforms**: {platforms}.  
 **Rating**: {rating_value} ({rating_count} ratings).  
 **Size**: {size}.  
 
 #### 💸 **Pricing**  
-**Price**: {prices}  
+**Price**: {price}  
 **In-App Purchases**: {iap_count}  
 {iaps}  
 
@@ -230,11 +230,12 @@ class AppStoreApplication:
             dev_url=self.developer.url,
             age=self.age,
             category=self.category,
+            last_update=self.last_update,
             platforms=fancy_join(", ", self.platforms, " & "),
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
-            prices=self.price,
+            price=self.price,
             iap_count=iap_count,
             iaps="\n".join(iap_list),
             privacy_policy=self.privacy_policy,
