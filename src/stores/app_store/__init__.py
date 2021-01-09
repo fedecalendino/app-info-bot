@@ -208,7 +208,9 @@ class AppStoreApplication:
 
         for card in self.privacy_cards:
             if card.items:
-                privacy_cards_list.append(f"{card.title}: {fancy_join(', ', card.items, ' & ')}.")
+                privacy_cards_list.append(
+                    f"{card.title}: {fancy_join(', ', card.items, ' & ')}."
+                )
             else:
                 privacy_cards_list.append(f"{card.title}.")
 
