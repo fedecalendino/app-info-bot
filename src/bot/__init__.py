@@ -34,7 +34,7 @@ def analyze_subreddit(subreddit: str) -> dict:
         "is_self": [],
         "is_unsupported": [],
         "was_analyzed": [],
-        "error": [],
+        "errors": [],
     }
 
     for submission in list(reddit.subreddit(subreddit).new(limit=25)):
