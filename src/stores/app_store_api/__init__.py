@@ -24,14 +24,15 @@ ____
 **Platforms**: {platforms}.  
 **Rating**: {rating_value} stars ({rating_count} ratings).  
 **Size**: {size}.  
+
 #### 💸 **Pricing**  
 **Prices**: {prices}  
 **In-App Purchases**: {iap_count}  
 {iaps}  
+
 #### 🔒️ **Privacy**  
 **Policy**: {privacy_policy}  
-**Specification**:  
-{privacy_cards}
+**Specification**: {privacy_cards}
   
 ---  
   
@@ -100,7 +101,7 @@ class AppStoreApplication:
 
         for platform, data in self.attributes["platformAttributes"].items():
             for offer in data["offers"]:
-                if offer["type"] != "get":
+                if offer["type"] not in ["get", "buy"]:
                     continue
 
                 attrs.append(
@@ -177,10 +178,17 @@ class AppStoreApplication:
         return self.attributes["url"]
 
     def __str__(self) -> str:
-        price_list = [""]
+        prices = self.prices
 
-        for price in self.prices:
-            price_list.append(f" * {price.platform}: {price.value}  ")
+        if len(prices) == 1:
+            price_list = prices[0].value
+        else:
+            price_list = [""]
+
+            for price in prices:
+                price_list.append(f" * {price.platform}: {price.value}  ")
+
+            price_list = "\n".join(price_list)
 
         iaps = self.iaps
 
@@ -204,6 +212,11 @@ class AppStoreApplication:
             else:
                 privacy_cards_list.append(f" * {card.title}.")
 
+        if len(privacy_cards_list) == 1 and ": " not in privacy_cards_list[0]:
+            privacy_cards_list = privacy_cards_list[0]
+        else:
+            privacy_cards_list = "\n".join([""] + privacy_cards_list)
+
         return TEMPLATE.format(
             title=self.title,
             url=self.url,
@@ -215,10 +228,10 @@ class AppStoreApplication:
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
-            prices="\n".join(price_list),
+            prices=price_list,
             iap_count=iap_count,
             iaps="\n".join(iap_list),
             privacy_policy=self.privacy_policy[0].value,
-            privacy_cards="\n".join(privacy_cards_list),
+            privacy_cards=privacy_cards_list,
             github=GITHUB,
         )

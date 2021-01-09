@@ -44,7 +44,7 @@ PARAMS = {
 }
 
 HEADERS = {
-    "authorization": "Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkNSRjVITkJHUFEifQ.eyJpc3MiOiI4Q1UyNk1LTFM0IiwiaWF0IjoxNjA4MTYzMDk0LCJleHAiOjE2MTExODcwOTR9.FSD4K4vZZy1ouVlyS-vXLQavXuXVo5kbWQGnYIgoWq8Am5DwP7tJlLjkLxeZ0k3D2XDH0F6fAN4FwfUYCIqXGw",
+    "authorization": "Bearer ",
     "accept": "application/json",
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0)",
     "content-type": "application/x-www-form-urlencoded; charset=UTF-8",

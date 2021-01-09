@@ -16,27 +16,30 @@ from .helpers import find_by_attr, find_all_by_attr
 TEMPLATE = """
 ## [**{title}**]({url})  
  > by [{dev_name}]({dev_url})  
-
-____
-
+  
+{subtitle}  
+  
+____  
+  
 #### ℹ️ **App Info**  
 **Age**: {age}.  
 **Category**: {category}.  
 **Platforms**: {platforms}.  
-**Rating**: {rating_value} stars ({rating_count} ratings).  
+**Rating**: {rating_value} ({rating_count} ratings).  
 **Size**: {size}.  
+
 #### 💸 **Pricing**  
-**Prices**: {prices}  
+**Price**: {prices}  
 **In-App Purchases**: {iap_count}  
 {iaps}  
+
 #### 🔒️ **Privacy**  
 **Policy**: {privacy_policy}  
-**Specification**:  
-{privacy_cards}
-
+**Specification**: {privacy_cards}
+  
 ---  
-
-^[github]({github})
+  
+^[github]({github})  
 """
 
 
@@ -174,6 +177,15 @@ class AppStoreApplication:
         return self.soup.find("link", rel="canonical")["href"]
 
     def __str__(self) -> str:
+        # == Subtitle =====================================
+        subtitle = self.subtitle
+
+        if subtitle:
+            subtitle = f"{subtitle}."
+        else:
+            subtitle = ""
+
+        # == IAPs =========================================
         iaps = self.iaps
 
         if len(iaps) == 3:
@@ -187,21 +199,31 @@ class AppStoreApplication:
 
         for iap in iaps:
             if iap.price:
-                iap_list.append(f" * {iap.name}: {iap.price}")
+                iap_list.append(f" * {iap.name}: {iap.price}  ")
             else:
-                iap_list.append(f" * {iap.name}")
+                iap_list.append(f" * {iap.name}  ")
 
+        # == Privacy Cards ================================
         privacy_cards_list = []
 
         for card in self.privacy_cards:
             if card.items:
-                privacy_cards_list.append(f" * {card.title}: {fancy_join(', ', card.items, ' & ')}.")
+                privacy_cards_list.append(f"{card.title}: {fancy_join(', ', card.items, ' & ')}.")
             else:
-                privacy_cards_list.append(f" * {card.title}.")
+                privacy_cards_list.append(f"{card.title}.")
+
+        if len(privacy_cards_list) == 0:
+            privacy_cards_list = "Unknown."
+        elif len(privacy_cards_list) == 1 and ": " not in privacy_cards_list[0]:
+            privacy_cards_list = privacy_cards_list[0]
+        else:
+            cards = [""] + [f"  * {card}  " for card in privacy_cards_list]
+            privacy_cards_list = "\n".join(cards)
 
         return TEMPLATE.format(
             title=self.title,
             url=self.url,
+            subtitle=subtitle,
             dev_name=self.developer.name,
             dev_url=self.developer.url,
             age=self.age,
@@ -214,6 +236,6 @@ class AppStoreApplication:
             iap_count=iap_count,
             iaps="\n".join(iap_list),
             privacy_policy=self.privacy_policy,
-            privacy_cards="\n".join(privacy_cards_list),
+            privacy_cards=privacy_cards_list,
             github=GITHUB,
         )
