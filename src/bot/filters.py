@@ -7,7 +7,7 @@ from stores import SUPPORTED_STORES
 
 
 def is_old(submission: Submission) -> bool:
-    return submission.created_utc < 1610150400  # 2019-01-09
+    return submission.created_utc < 1609891200  # 2019-01-06
 
 
 def is_self(submission: Submission) -> bool:
