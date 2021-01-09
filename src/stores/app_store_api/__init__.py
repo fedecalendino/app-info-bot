@@ -1,6 +1,5 @@
-import requests
-
 from settings import GITHUB
+
 from stores.classes import (
     Developer,
     PlatformAttr,
@@ -10,65 +9,41 @@ from stores.classes import (
 )
 from utils import fancy_join
 
-URL = "https://amp-api.apps.apple.com/v1/catalog/US/apps/{app_id}"
-
-EXTEND = [
-    "description",
-    "developerInfo",
-    "distributionKind",
-    "editorialVideo",
-    "fileSizeByDevice",
-    "messagesScreenshots",
-    "platformAttributes",
-    "privacy",
-    "privacyPolicyUrl",
-    "privacyPolicyText",
-    "promotionalText",
-    "screenshotsByType",
-    "supportURLForLanguage",
-    "versionHistory",
-    "videoPreviewsByType",
-    "websiteUrl",
-]
-INCLUDE = [
-    "genres",
-    "developer",
-    "reviews",
-    "merchandised-in-apps",
-    "customers-also-bought-apps",
-    "developer-other-apps",
-    "app-bundles",
-    "top-in-apps",
-]
-PLATFORMS = ["appletv", "ipad", "iphone", "mac"]
+from . import helpers
 
 
-PARAMS = {
-    "platform": "web",
-    "additionalPlatforms": ",".join(PLATFORMS),
-    "extend": ",".join(EXTEND),
-    "include": ",".join(INCLUDE),
-    "l": "en-us",
-    "limit[merchandised-in-apps]": 20,
-}
+TEMPLATE = """
+## [**{title}**]({url})  
+ > by [{dev_name}]({dev_url})  
 
-HEADERS = {
-    "authorization": "Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkNSRjVITkJHUFEifQ.eyJpc3MiOiI4Q1UyNk1LTFM0IiwiaWF0IjoxNjA4MTYzMDk0LCJleHAiOjE2MTExODcwOTR9.FSD4K4vZZy1ouVlyS-vXLQavXuXVo5kbWQGnYIgoWq8Am5DwP7tJlLjkLxeZ0k3D2XDH0F6fAN4FwfUYCIqXGw",
-    "accept": "application/json",
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0)",
-    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "origin": "https://apps.apple.com",
-    "referer": "https://apps.apple.com/",
-}
+____
+  
+#### ℹ️ **App Info**  
+**Age**: {age}.  
+**Category**: {category}.  
+**Platforms**: {platforms}.  
+**Rating**: {rating_value} stars ({rating_count} ratings).  
+**Size**: {size}.  
+#### 💸 **Pricing**  
+**Prices**: {prices}  
+**In-App Purchases**: {iap_count}  
+{iaps}  
+#### 🔒️ **Privacy**  
+**Policy**: {privacy_policy}  
+**Specification**:  
+{privacy_cards}
+  
+---  
+  
+^[github]({github})
+"""
 
 
 class AppStoreApplication:
     store = "App Store"
 
     def __init__(self, url: str):
-        url = URL.format(app_id=url.split("/")[-1].replace("id", ""))
-        response = requests.get(url, headers=HEADERS, params=PARAMS)
-        data = response.json()["data"][0]
+        data = helpers.get_data(app_id=url.split("/")[-1].replace("id", ""))
 
         self.attributes = data["attributes"]
         self.relationships = data["relationships"]
@@ -202,59 +177,48 @@ class AppStoreApplication:
         return self.attributes["url"]
 
     def __str__(self) -> str:
-        lines = []
-
-        print(self.subtitle)
-        lines.append(f"## [**{self.title}**]({self.url})")
-        lines.append(f" > by [{self.developer.name}]({self.developer.url})")
-
-        lines.append("\n____\n")
-
-        lines.append("#### ℹ️ **App Info**")
-
-        lines.append(f"**Age**: {self.age}.")
-        lines.append(f"**Category**: {self.category}.")
-        lines.append(f"**Platforms**: {fancy_join(', ', self.platforms, ' & ')}.")
-
-        rating = self.rating
-        lines.append(f"**Rating**: {rating.value} ({rating.count} ratings).")
-        lines.append(f"**Size**: {self.size}.")
-
-        lines.append("#### 💸 **Pricing**")
-
-        lines.append(f"**Prices**:")
+        price_list = [""]
 
         for price in self.prices:
-            lines.append(f" * {price.platform}: {price.value}")
+            price_list.append(f" * {price.platform}: {price.value}  ")
 
         iaps = self.iaps
 
         if len(iaps) > 5:
-            count = "5+"
+            iap_count = "5+"
         elif len(iaps) == 0:
-            count = "None"
+            iap_count = "None"
         else:
-            count = str(len(iaps))
+            iap_count = str(len(iaps))
 
-        lines.append(f"**In-App Purchases**: {count}")
+        iap_list = []
 
         for iap in iaps[:5]:
-            lines.append(f" * {iap.name}: {iap.price}")
+            iap_list.append(f" * {iap.name}: {iap.price}")
 
-        lines.append("#### 🔒️ **Privacy**")
+        privacy_cards_list = []
 
-        lines.append(f"**Policy**: {self.privacy_policy}")
-        lines.append(f"**Specification**:")
         for card in self.privacy_cards:
             if card.items:
-                lines.append(f" * {card.title}: {fancy_join(', ', card.items, ' & ')}.")
+                privacy_cards_list.append(f" * {card.title}: {fancy_join(', ', card.items, ' & ')}.")
             else:
-                lines.append(f" * {card.title}.")
+                privacy_cards_list.append(f" * {card.title}.")
 
-        lines.append("")
-        lines.append("---")
-        lines.append("")
-
-        lines.append(f"^[github]({GITHUB})")
-
-        return "  \n".join(lines)
+        return TEMPLATE.format(
+            title=self.title,
+            url=self.url,
+            dev_name=self.developer.name,
+            dev_url=self.developer.url,
+            age=self.age,
+            category=self.category,
+            platforms=fancy_join(", ", self.platforms, " & "),
+            rating_value=self.rating.value,
+            rating_count=self.rating.count,
+            size=self.size,
+            prices="\n".join(price_list),
+            iap_count=iap_count,
+            iaps="\n".join(iap_list),
+            privacy_policy=self.privacy_policy[0].value,
+            privacy_cards="\n".join(privacy_cards_list),
+            github=GITHUB,
+        )

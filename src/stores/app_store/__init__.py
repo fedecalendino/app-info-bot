@@ -13,6 +13,32 @@ from stores.classes import (
 from utils import fancy_join
 from .helpers import find_by_attr, find_all_by_attr
 
+TEMPLATE = """
+## [**{title}**]({url})  
+ > by [{dev_name}]({dev_url})  
+
+____
+
+#### ℹ️ **App Info**  
+**Age**: {age}.  
+**Category**: {category}.  
+**Platforms**: {platforms}.  
+**Rating**: {rating_value} stars ({rating_count} ratings).  
+**Size**: {size}.  
+#### 💸 **Pricing**  
+**Prices**: {prices}  
+**In-App Purchases**: {iap_count}  
+{iaps}  
+#### 🔒️ **Privacy**  
+**Policy**: {privacy_policy}  
+**Specification**:  
+{privacy_cards}
+
+---  
+
+^[github]({github})
+"""
+
 
 class AppStoreApplication:
     store = "App Store"
@@ -33,6 +59,11 @@ class AppStoreApplication:
 
         response = requests.get(url)
         self.soup = BeautifulSoup(response.content, features="html.parser")
+
+    @property
+    def age(self) -> str:
+        tag = find_by_attr(self.soup, "span", "data-test-product-rating")
+        return tag.text.strip() if tag else None
 
     @property
     def category(self) -> str:
@@ -143,64 +174,46 @@ class AppStoreApplication:
         return self.soup.find("link", rel="canonical")["href"]
 
     def __str__(self) -> str:
-        lines = []
-
-        lines.append(f"## [**{self.title}**]({self.url})")
-        lines.append(f" > by [{self.developer.name}]({self.developer.url})")
-
-        lines.append("\n____\n")
-
-        lines.append("#### ℹ️ **App Info**")
-
-        lines.append(f"**Category**: {self.category}.")
-        lines.append(f"**Compatibility**: {self.compatibility}.")
-        lines.append(f"**Platforms**: {fancy_join(', ', self.platforms, ' & ')}.")
-
-        rating = self.rating
-
-        if rating:
-            lines.append(f"**Rating**: {rating.value} ({rating.count}).")
-        else:
-            lines.append(f"**Rating**: -.")
-
-        lines.append(f"**Size**: {self.size}.")
-
-        lines.append("#### 💸 **Pricing**")
-
-        lines.append(f"**Price**: {self.price}")
-
         iaps = self.iaps
 
         if len(iaps) == 3:
-            count = "3+"
+            iap_count = "3+"
         elif len(iaps) == 0:
-            count = "None"
+            iap_count = "None"
         else:
-            count = str(len(iaps))
+            iap_count = str(len(iaps))
 
-        lines.append(f"**In-App Purchases**: {count}")
+        iap_list = []
 
-        if iaps:
-            for iap in iaps:
-                if iap.price:
-                    lines.append(f" * {iap.name}: {iap.price}")
-                else:
-                    lines.append(f" * {iap.name}")
+        for iap in iaps:
+            if iap.price:
+                iap_list.append(f" * {iap.name}: {iap.price}")
+            else:
+                iap_list.append(f" * {iap.name}")
 
-        lines.append("#### 🔒️ **Privacy**")
+        privacy_cards_list = []
 
-        lines.append(f"**Policy**: {self.privacy_policy}")
-        lines.append(f"**Specification**:")
         for card in self.privacy_cards:
             if card.items:
-                lines.append(f" * {card.title}: {fancy_join(', ', card.items, ' & ')}.")
+                privacy_cards_list.append(f" * {card.title}: {fancy_join(', ', card.items, ' & ')}.")
             else:
-                lines.append(f" * {card.title}.")
+                privacy_cards_list.append(f" * {card.title}.")
 
-        lines.append("")
-        lines.append("---")
-        lines.append("")
-
-        lines.append(f"^[github]({GITHUB})")
-
-        return "  \n".join(lines)
+        return TEMPLATE.format(
+            title=self.title,
+            url=self.url,
+            dev_name=self.developer.name,
+            dev_url=self.developer.url,
+            age=self.age,
+            category=self.category,
+            platforms=fancy_join(", ", self.platforms, " & "),
+            rating_value=self.rating.value,
+            rating_count=self.rating.count,
+            size=self.size,
+            prices=self.price,
+            iap_count=iap_count,
+            iaps="\n".join(iap_list),
+            privacy_policy=self.privacy_policy,
+            privacy_cards="\n".join(privacy_cards_list),
+            github=GITHUB,
+        )
