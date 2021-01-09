@@ -37,7 +37,7 @@ def analyze_subreddit(subreddit: str) -> dict:
         "errors": [],
     }
 
-    for submission in list(reddit.subreddit(subreddit).new(limit=25)):
+    for submission in list(reddit.subreddit(subreddit).new(limit=10)):
         data = {"id": submission.id, "title": submission.title}
 
         if filters.is_self(submission):
