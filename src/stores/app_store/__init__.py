@@ -201,7 +201,7 @@ class AppStoreApplication:
             if iap.price:
                 iap_list.append(f" * {iap.name}: {iap.price}  ")
             else:
-                iap_list.append(f" * {iap.name}  ")
+                iap_list.append(f" * {iap.name}: Free  ")
 
         # == Privacy Cards ================================
         privacy_cards_list = []
