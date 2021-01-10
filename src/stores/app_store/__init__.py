@@ -153,7 +153,7 @@ class AppStoreApplication:
         count = tag.text.lower() if tag else None
 
         if not score or not count:
-            return None
+            return Rating("n/a", "not enough")
 
         return Rating(score, count)
 
