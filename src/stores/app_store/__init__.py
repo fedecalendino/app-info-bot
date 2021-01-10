@@ -35,7 +35,8 @@ ____
 
 #### 🔒️ **Privacy**  
 **Policy**: {privacy_policy}  
-**Specification**: {privacy_cards}
+**Specification**:  
+{privacy_cards}  
   
 ---  
   
@@ -215,11 +216,9 @@ class AppStoreApplication:
                 privacy_cards_list.append(f"{card.title}.")
 
         if len(privacy_cards_list) == 0:
-            privacy_cards_list = "Unknown."
-        elif len(privacy_cards_list) == 1 and ": " not in privacy_cards_list[0]:
-            privacy_cards_list = privacy_cards_list[0]
+            privacy_cards_list = ". * Unknown."
         else:
-            cards = [""] + [f"  * {card}  " for card in privacy_cards_list]
+            cards = [f"  * {card}  " for card in privacy_cards_list]
             privacy_cards_list = "\n".join(cards)
 
         return TEMPLATE.format(
