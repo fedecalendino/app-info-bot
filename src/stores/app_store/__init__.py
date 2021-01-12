@@ -11,6 +11,7 @@ from stores.classes import (
     Rating,
 )
 from utils import fancy_join
+from .appsliced import AppSliced
 from .helpers import find_by_attr, find_all_by_attr
 
 TEMPLATE = """
@@ -28,10 +29,10 @@ ____
 **Rating**: {rating_value} ({rating_count} ratings).  
 **Size**: {size}.  
 
-#### 💸 **Pricing**  
+#### 💸 **Pricing (in USD)**
 **Price**: {price}  
-**In-App Purchases**: {iap_count}  
-{iaps}  
+**In-App Purchases**: {iaps}  
+**History**: {price_history}  
 
 #### 🔒️ **Privacy**  
 **Policy**: {privacy_policy}  
@@ -62,6 +63,8 @@ class AppStoreApplication:
             url = self.us_store(url)
 
         response = requests.get(url)
+
+        self.app_sliced = AppSliced(app_id=response.url.split("/")[-1])
         self.soup = BeautifulSoup(response.content, features="html.parser")
 
     @property
@@ -119,6 +122,10 @@ class AppStoreApplication:
     def price(self) -> str:
         tag = self.soup.find("li", class_="app-header__list__item--price")
         return tag.text.strip()
+
+    @property
+    def price_history(self) -> list[str]:
+        return self.app_sliced.price_history
 
     @property
     def privacy_cards(self) -> list[PrivacyCard]:
@@ -204,6 +211,14 @@ class AppStoreApplication:
             else:
                 iap_list.append(f" * {iap.name}: Free  ")
 
+        # == Price History ================================
+        price_history = self.price_history
+
+        if not price_history:
+            price_history_str = "n/a"
+        else:
+            price_history_str = "\n".join(["  "] + [f"  * {item}  " for item in price_history])
+
         # == Privacy Cards ================================
         privacy_cards_list = []
 
@@ -216,7 +231,7 @@ class AppStoreApplication:
                 privacy_cards_list.append(f"{card.title}.")
 
         if len(privacy_cards_list) == 0:
-            privacy_cards_list = ". * Unknown."
+            privacy_cards_list = " * Unknown."
         else:
             cards = [f"  * {card}  " for card in privacy_cards_list]
             privacy_cards_list = "\n".join(cards)
@@ -235,6 +250,7 @@ class AppStoreApplication:
             rating_count=self.rating.count,
             size=self.size,
             price=self.price,
+            price_history=price_history_str,
             iap_count=iap_count,
             iaps="\n".join(iap_list),
             privacy_policy=self.privacy_policy,
