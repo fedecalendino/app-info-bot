@@ -22,26 +22,34 @@ TEMPLATE = """
   
 ____  
   
-#### ℹ️ **App Info**  
+### ℹ️ **App Info**  
 **Category**: {category}.  
-**Last Update**: {last_update}.  
-**Platforms**: {platforms}.  
-**Rating**: {rating_value} ({rating_count} ratings).  
+
+**Last Update**: {last_update}.
+  
+**Platforms**: {platforms}.
+  
+**Rating**: {rating_value} ({rating_count}).
+  
 **Size**: {size}.  
 
-#### 💸 **Pricing (in USD)**
-**Price**: {price}  
-**In-App Purchases**: {iaps}  
+
+### 💸 **Pricing (in USD)**
+**Current**: {price}  
+
 **History**: {price_history}  
 
-#### 🔒️ **Privacy**  
+**IAPs**: {iaps}  
+
+### 🔒️ **Privacy**  
 **Policy**: {privacy_policy}  
-**Specification**:  
-{privacy_cards}  
+
+**Specification**: {privacy_cards}  
   
 ---  
   
 ^[github]({github})  
+  
 """
 
 
@@ -115,8 +123,12 @@ class AppStoreApplication:
 
     @property
     def platforms(self) -> list[str]:
-        tags = find_all_by_attr(self.soup, "a", "data-test-app-platform-link")
-        return [a.text.strip() for a in tags]
+        tags = list(find_all_by_attr(self.soup, "a", "data-test-app-platform-link"))
+
+        if not tags:
+            tags = list(find_all_by_attr(self.soup, "h2", "data-test-app-screenshots-title"))
+
+        return [a.text.strip().replace(" Screenshots", "") for a in tags]
 
     @property
     def price(self) -> str:
@@ -161,7 +173,7 @@ class AppStoreApplication:
         count = tag.text.lower() if tag else None
 
         if not score or not count:
-            return Rating("n/a", "not enough")
+            return Rating("n/a", "not enough ratings")
 
         return Rating(score, count)
 
@@ -185,23 +197,29 @@ class AppStoreApplication:
         return self.soup.find("link", rel="canonical")["href"]
 
     def __str__(self) -> str:
-        # == Subtitle =====================================
+        developer = self.developer
+        iaps = self.iaps
+        platforms = self.platforms
+        price_history = self.price_history[:5]
+        privacy_cards = self.privacy_cards
         subtitle = self.subtitle
 
+        # == Platforms ====================================
+        platforms_str = fancy_join(", ", platforms, " & ")
+
+        # == Subtitle =====================================
         if subtitle:
-            subtitle = f"{subtitle}."
+            subtitle_str = f"{subtitle}."
         else:
-            subtitle = ""
+            subtitle_str = ""
 
         # == IAPs =========================================
-        iaps = self.iaps
-
         if len(iaps) == 3:
-            iap_count = "3+"
+            iap_count = "3+  "
         elif len(iaps) == 0:
-            iap_count = "None"
+            iap_count = "None  "
         else:
-            iap_count = str(len(iaps))
+            iap_count = f"{len(iaps)}  "
 
         iap_list = []
 
@@ -211,49 +229,37 @@ class AppStoreApplication:
             else:
                 iap_list.append(f" * {iap.name}: Free  ")
 
-        # == Price History ================================
-        price_history = self.price_history
+        iaps_str = "\n".join([iap_count] + [f"  * {item}  " for item in iap_list])
 
+        # == Price History ================================
         if not price_history:
             price_history_str = "n/a"
         else:
             price_history_str = "\n".join(["  "] + [f"  * {item}  " for item in price_history])
 
         # == Privacy Cards ================================
-        privacy_cards_list = []
-
-        for card in self.privacy_cards:
-            if card.items:
-                privacy_cards_list.append(
-                    f"{card.title}: {fancy_join(', ', card.items, ' & ')}."
-                )
-            else:
-                privacy_cards_list.append(f"{card.title}.")
-
-        if len(privacy_cards_list) == 0:
-            privacy_cards_list = " * Unknown."
+        if len(privacy_cards) == 1 and len(privacy_cards[0].items) == 0:
+            privacy_cards_str = f"{privacy_cards[0].title}  "
         else:
-            cards = [f"  * {card}  " for card in privacy_cards_list]
-            privacy_cards_list = "\n".join(cards)
+            privacy_cards_str = "\n".join(["  "] + [f"  * {card}  " for card in privacy_cards])
 
         return TEMPLATE.format(
             title=self.title,
             url=self.url,
-            subtitle=subtitle,
-            dev_name=self.developer.name,
-            dev_url=self.developer.url,
+            subtitle=subtitle_str,
+            dev_name=developer.name,
+            dev_url=developer.url,
             age=self.age,
             category=self.category,
             last_update=self.last_update,
-            platforms=fancy_join(", ", self.platforms, " & "),
+            platforms=platforms_str,
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
             price=self.price,
             price_history=price_history_str,
-            iap_count=iap_count,
-            iaps="\n".join(iap_list),
+            iaps=iaps_str,
             privacy_policy=self.privacy_policy,
-            privacy_cards=privacy_cards_list,
+            privacy_cards=privacy_cards_str,
             github=GITHUB,
         )

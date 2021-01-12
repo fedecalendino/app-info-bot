@@ -31,6 +31,12 @@ class AppSliced:
 
                 icon = ""
 
+                if "more_recent_expand" in string:
+                    continue
+
+                if "more_recent_collapse" in string:
+                    continue
+
                 if "history" in string:
                     icon = "⏺️"
                 elif "down" in string:
