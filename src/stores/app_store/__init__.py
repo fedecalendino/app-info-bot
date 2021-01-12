@@ -225,9 +225,9 @@ class AppStoreApplication:
 
         for iap in iaps:
             if iap.price:
-                iap_list.append(f" * {iap.name}: {iap.price}  ")
+                iap_list.append(f"{iap.name}: {iap.price}  ")
             else:
-                iap_list.append(f" * {iap.name}: Free  ")
+                iap_list.append(f"{iap.name}: Free  ")
 
         iaps_str = "\n".join([iap_count] + [f"  * {item}  " for item in iap_list])
 
