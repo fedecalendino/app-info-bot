@@ -3,7 +3,7 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 
-from settings import GITHUB
+from settings import DEV, GITHUB
 from stores.classes import (
     Developer,
     Price,
@@ -48,8 +48,8 @@ ____
   
 ---  
   
-^[github]({github})  
-  
+^[dev]({dev}) ^| ^[github]({github})   
+
 """
 
 
@@ -262,4 +262,5 @@ class AppStoreApplication:
             privacy_policy=self.privacy_policy,
             privacy_cards=privacy_cards_str,
             github=GITHUB,
+            dev=DEV,
         )

@@ -5,7 +5,8 @@ IP = "127.0.0.1" if PORT == 6000 else "0.0.0.0"
 
 API_KEY = os.environ.get("API_KEY", "test")
 
-GITHUB = "https://github.com/fedecalendino/app-info-bot"
+DEV = os.environ.get("DEV", "https://reddit.com/user/test")
+GITHUB = os.environ.get("GITHUB", "https://github.com/test/respository")
 
 REDDIT_USERNAME = os.environ.get("REDDIT_USERNAME")
 REDDIT_PASSWORD = os.environ.get("REDDIT_PASSWORD")
