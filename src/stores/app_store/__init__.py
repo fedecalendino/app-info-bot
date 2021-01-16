@@ -3,7 +3,7 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 
-from settings import DEV, GITHUB
+import settings
 from stores.classes import (
     Developer,
     Price,
@@ -72,8 +72,12 @@ class AppStoreApplication:
 
         response = requests.get(url)
 
-        self.app_sliced = AppSliced(app_id=response.url.split("/")[-1])
         self.soup = BeautifulSoup(response.content, features="html.parser")
+
+        try:
+            self.app_sliced = AppSliced(app_id=response.url.split("/")[-1])
+        except:
+            self.app_sliced = None
 
     @property
     def age(self) -> str:
@@ -137,7 +141,10 @@ class AppStoreApplication:
 
     @property
     def price_history(self) -> list[str]:
-        return self.app_sliced.price_history
+        if self.app_sliced:
+            return self.app_sliced.price_history
+        else:
+            return []
 
     @property
     def privacy_cards(self) -> list[PrivacyCard]:
@@ -261,6 +268,6 @@ class AppStoreApplication:
             iaps=iaps_str,
             privacy_policy=self.privacy_policy,
             privacy_cards=privacy_cards_str,
-            github=GITHUB,
-            dev=DEV,
+            github=settings.GITHUB,
+            dev=settings.DEV,
         )
