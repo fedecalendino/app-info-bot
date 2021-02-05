@@ -27,7 +27,7 @@ ____
 
 **Last Update**: {last_update}.
   
-**Platforms**: {platforms}.
+**Compatibility**: {compatibility}.
   
 **Rating**: {rating_value} ({rating_count}).
   
@@ -104,7 +104,7 @@ class AppStoreApplication:
         tag = self.soup.find("h2", class_="app-header__identity")
         name = tag.text.strip()
 
-        tag = tag.find("a", class_="link")
+        tag = tag.contents[1]
         return Developer(name=name, url=tag["href"])
 
     @property
@@ -199,7 +199,7 @@ class AppStoreApplication:
 
     @property
     def title(self) -> str:
-        tag = find_by_attr(self.soup, "h1", "data-test-product-name")
+        tag = self.soup.find("h1", class_="app-header__title")
         return tag.find(text=True).strip()
 
     @property
@@ -262,6 +262,7 @@ class AppStoreApplication:
             age=self.age,
             category=self.category,
             last_update=self.last_update,
+            compatibility=self.compatibility,
             platforms=platforms_str,
             rating_value=self.rating.value,
             rating_count=self.rating.count,
