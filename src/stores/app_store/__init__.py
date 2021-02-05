@@ -27,7 +27,7 @@ ____
 
 **Last Update**: {last_update}.
   
-**Compatibility**: {compatibility}.
+**Platforms**: {platforms}.
   
 **Rating**: {rating_value} ({rating_count}).
   
@@ -101,8 +101,11 @@ class AppStoreApplication:
 
     @property
     def developer(self) -> Developer:
-        tag = find_by_attr(self.soup, "a", "data-test-developer-link")
-        return Developer(name=tag.text.strip(), url=tag["href"])
+        tag = self.soup.find("h2", class_="app-header__identity")
+        name = tag.text.strip()
+
+        tag = tag.find("a", class_="link")
+        return Developer(name=name, url=tag["href"])
 
     @property
     def iaps(self) -> list[Price]:
@@ -259,8 +262,7 @@ class AppStoreApplication:
             age=self.age,
             category=self.category,
             last_update=self.last_update,
-            compatibility=self.compatibility,
-            # platforms=platforms_str,
+            platforms=platforms_str,
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
