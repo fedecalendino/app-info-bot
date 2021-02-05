@@ -27,7 +27,7 @@ ____
 
 **Last Update**: {last_update}.
   
-**Platforms**: {platforms}.
+**Compatibility**: {compatibility}.
   
 **Rating**: {rating_value} ({rating_count}).
   
@@ -259,7 +259,8 @@ class AppStoreApplication:
             age=self.age,
             category=self.category,
             last_update=self.last_update,
-            platforms=platforms_str,
+            compatibility=self.compatibility,
+            # platforms=platforms_str,
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
