@@ -1,3 +1,5 @@
+import html
+from json import loads
 from urllib import parse
 
 import requests
@@ -25,11 +27,13 @@ ____
 ### ℹ️ **App Info**  
 **Category**: {category}.  
 
-**Last Update**: {last_update}.
+**Release**: {release}.  
+
+**Last Update**: {last_update}.  
   
-**Compatibility**: {compatibility}.
+**Platforms**: {platforms} ({compatibility}).  
   
-**Rating**: {rating_value} ({rating_count}).
+**Rating**: {rating_value} ({rating_count}).  
   
 **Size**: {size}.  
 
@@ -73,6 +77,7 @@ class AppStoreApplication:
         response = requests.get(url)
 
         self.soup = BeautifulSoup(response.content, features="html.parser")
+        self.json = loads(html.unescape(self.soup.find("script", attrs={"name": "schema:software-application"}).string))
 
         try:
             self.app_sliced = AppSliced(app_id=response.url.split("/")[-1])
@@ -81,39 +86,42 @@ class AppStoreApplication:
 
     @property
     def age(self) -> str:
-        tag = find_by_attr(self.soup, "span", "data-test-product-rating")
+        tag = self.soup.find("span", class_="badge badge--product-title")
         return tag.text.strip() if tag else None
 
     @property
     def category(self) -> str:
-        tag = find_by_attr(self.soup, "dd", "data-test-app-info-category")
-        return tag.text.strip() if tag else None
+        return self.json.get("applicationCategory")
 
     @property
     def compatibility(self) -> str:
-        tag = find_by_attr(self.soup, "dd", "data-test-app-info-compatibility")
-        return tag.text.strip().split(". ")[0] if tag else None
+        return self.json.get("operatingSystem").split(". Compatible ")[0]
 
     @property
     def description(self) -> list[str]:
-        tag = find_by_attr(self.soup, "div", "data-test-description")
-        return [str(p) for p in tag.find("p") if str(p) != "<br/>"]
+        return self.json.get("description")
+
+    @property
+    def description_short(self) -> str:
+        return self.soup.find("meta", attrs={"name": "twitter:description"})["content"]
 
     @property
     def developer(self) -> Developer:
-        tag = self.soup.find("h2", class_="app-header__identity")
-        name = tag.text.strip()
-
-        tag = tag.contents[1]
-        return Developer(name=name, url=tag["href"])
+        return Developer(
+            name=self.json["author"]["name"],
+            url=self.json["author"]["url"],
+        )
 
     @property
     def iaps(self) -> list[Price]:
-        tags = find_all_by_attr(self.soup, "li", "data-test-app-info-iap")
+        tag = self.soup.find("dt", text="In-App Purchases")
+
+        if not tag:
+            return []
 
         iaps = []
 
-        for li in tags:
+        for li in tag.parent.find_all("li"):
             split = li.text.strip().split("\n")
 
             if len(split) == 2:
@@ -130,17 +138,13 @@ class AppStoreApplication:
 
     @property
     def platforms(self) -> list[str]:
-        tags = list(find_all_by_attr(self.soup, "a", "data-test-app-platform-link"))
-
-        if not tags:
-            tags = list(find_all_by_attr(self.soup, "h2", "data-test-app-screenshots-title"))
-
-        return [a.text.strip().replace(" Screenshots", "") for a in tags]
+        tag = self.soup.find("h2", text="Screenshots").parent
+        return [a.text.strip().replace(" Screenshots", "") for a in tag.find_all("a")]
 
     @property
     def price(self) -> str:
-        tag = self.soup.find("li", class_="app-header__list__item--price")
-        return tag.text.strip()
+        offer = self.json["offers"]["price"]
+        return offer if offer else "Free"
 
     @property
     def price_history(self) -> list[str]:
@@ -151,14 +155,10 @@ class AppStoreApplication:
 
     @property
     def privacy_cards(self) -> list[PrivacyCard]:
-        tags = self.soup.find_all("div", class_="ember-view app-privacy__card")
-
         cards = []
-        for tag in tags:
-            spans = tag.find_all(
-                "span",
-                class_="privacy-type__grid-content privacy-type__data-category-heading",
-            )
+
+        for tag in self.soup.find_all("div", class_="app-privacy__card"):
+            spans = tag.find_all("span", class_="privacy-type__data-category-heading")
 
             cards.append(
                 PrivacyCard(
@@ -171,15 +171,15 @@ class AppStoreApplication:
 
     @property
     def privacy_policy(self) -> str:
-        tag = find_by_attr(self.soup, "a", "data-test-app-info-links-privacy")
+        tag = self.soup.find("a", attrs={"data-metrics-click": '{"actionType":"navigate","targetType":"link","targetId":"LinkToPrivacyPolicy"}'})
         return tag["href"] if tag else None
 
     @property
     def rating(self) -> Rating:
-        tag = find_by_attr(self.soup, "div", "data-test-average-rating")
+        tag = self.soup.find("div", class_="we-customer-ratings__averages")
         score = tag.text if tag else None
 
-        tag = find_by_attr(self.soup, "p", "data-test-rating-count")
+        tag = self.soup.find("p", class_="we-customer-ratings__count")
         count = tag.text.lower() if tag else None
 
         if not score or not count:
@@ -188,19 +188,25 @@ class AppStoreApplication:
         return Rating(score, count)
 
     @property
+    def release(self) -> str:
+        return self.json.get("datePublished")
+
+    @property
     def size(self) -> str:
-        tag = find_by_attr(self.soup, "dd", "data-test-app-info-size")
+        tag = self.soup.find("dt", text="Size")
+        if tag:
+            tag = tag.parent.find("dd")
+
         return tag.text if tag else None
 
     @property
     def subtitle(self) -> str:
-        tag = find_by_attr(self.soup, "h2", "data-test-product-subtitle")
+        tag = self.soup.find("h2", class_="product-header__subtitle app-header__subtitle")
         return tag.text.strip() if tag else None
 
     @property
     def title(self) -> str:
-        tag = self.soup.find("h1", class_="app-header__title")
-        return tag.find(text=True).strip()
+        return self.json.get("name")
 
     @property
     def url(self) -> str:
@@ -261,6 +267,7 @@ class AppStoreApplication:
             dev_url=developer.url,
             age=self.age,
             category=self.category,
+            release=self.release,
             last_update=self.last_update,
             compatibility=self.compatibility,
             platforms=platforms_str,
