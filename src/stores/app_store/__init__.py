@@ -12,7 +12,6 @@ from stores.classes import (
     PrivacyCard,
     Rating,
 )
-from utils import fancy_join
 from .appsliced import AppSliced
 from .helpers import find_by_attr, find_all_by_attr
 
@@ -31,7 +30,7 @@ ____
 
 **Last Update**: {last_update}.  
   
-**Platforms**: {platforms} ({compatibility}).  
+**Platforms**: {compatibility}  
   
 **Rating**: {rating_value} ({rating_count}).  
   
@@ -95,7 +94,12 @@ class AppStoreApplication:
 
     @property
     def compatibility(self) -> str:
-        return self.json.get("operatingSystem").split(". Compatible ")[0]
+        tag = self.soup.find("dt", text="Compatibility")
+
+        if tag:
+            tag = tag.parent.find("dd")
+
+        return tag.text.strip() if tag else None
 
     @property
     def description(self) -> list[str]:
@@ -137,14 +141,9 @@ class AppStoreApplication:
         return tag.text if tag else None
 
     @property
-    def platforms(self) -> list[str]:
-        tag = self.soup.find("h2", text="Screenshots").parent
-        return [a.text.strip().replace(" Screenshots", "") for a in tag.find_all("a")]
-
-    @property
     def price(self) -> str:
         offer = self.json["offers"]["price"]
-        return offer if offer else "Free"
+        return f"${offer}" if offer else "Free"
 
     @property
     def price_history(self) -> list[str]:
@@ -215,13 +214,9 @@ class AppStoreApplication:
     def __str__(self) -> str:
         developer = self.developer
         iaps = self.iaps
-        platforms = self.platforms
         price_history = self.price_history[:5]
         privacy_cards = self.privacy_cards
         subtitle = self.subtitle
-
-        # == Platforms ====================================
-        platforms_str = fancy_join(", ", platforms, " & ")
 
         # == Subtitle =====================================
         if subtitle:
@@ -270,7 +265,6 @@ class AppStoreApplication:
             release=self.release,
             last_update=self.last_update,
             compatibility=self.compatibility,
-            platforms=platforms_str,
             rating_value=self.rating.value,
             rating_count=self.rating.count,
             size=self.size,
