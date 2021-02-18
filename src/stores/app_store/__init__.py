@@ -99,7 +99,15 @@ class AppStoreApplication:
         if tag:
             tag = tag.parent.find("dd")
 
-        return tag.text.strip() if tag else None
+        if not tag:
+            return None
+
+        items = []
+
+        for item in tag.find_all("dl", class_="information-list__item__definition__item"):
+            items.append(item.text.strip().replace("\n                \n", ": "))
+
+        return "; ".join(sorted(items)) if items else tag.text.strip()
 
     @property
     def description(self) -> list[str]:
