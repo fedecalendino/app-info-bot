@@ -79,7 +79,8 @@ class AppStoreApplication:
         self.json = loads(
             html.unescape(
                 self.soup.find(
-                    "script", attrs={"name": "schema:software-application"}
+                    "script",
+                    attrs={"name": "schema:software-application"},
                 ).string
             )
         )

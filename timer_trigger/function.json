@@ -1,5 +1,6 @@
 {
   "scriptFile": "__init__.py",
+  "functionTimeout": "00:10:00",
   "bindings": [
     {
       "name": "mytimer",
