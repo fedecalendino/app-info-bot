@@ -6,7 +6,6 @@ URL = "https://appsliced.co/apps?search={app_id}"
 
 
 class AppSliced:
-
     def __init__(self, app_id: str):
         url = URL.format(app_id=app_id)
         response = requests.get(url)

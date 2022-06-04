@@ -76,7 +76,13 @@ class AppStoreApplication:
         response = requests.get(url)
 
         self.soup = BeautifulSoup(response.content, features="html.parser")
-        self.json = loads(html.unescape(self.soup.find("script", attrs={"name": "schema:software-application"}).string))
+        self.json = loads(
+            html.unescape(
+                self.soup.find(
+                    "script", attrs={"name": "schema:software-application"}
+                ).string
+            )
+        )
 
         try:
             self.app_sliced = AppSliced(app_id=response.url.split("/")[-1])
@@ -112,7 +118,9 @@ class AppStoreApplication:
 
         items = []
 
-        for item in tag.find_all("dl", class_="information-list__item__definition__item"):
+        for item in tag.find_all(
+            "dl", class_="information-list__item__definition__item"
+        ):
             items.append(item.text.strip().replace("\n                \n", ": "))
 
         return "; ".join(sorted(items)) if items else tag.text.strip()
@@ -185,7 +193,12 @@ class AppStoreApplication:
 
     @property
     def privacy_policy(self) -> str:
-        tag = self.soup.find("a", attrs={"data-metrics-click": '{"actionType":"navigate","targetType":"link","targetId":"LinkToPrivacyPolicy"}'})
+        tag = self.soup.find(
+            "a",
+            attrs={
+                "data-metrics-click": '{"actionType":"navigate","targetType":"link","targetId":"LinkToPrivacyPolicy"}'
+            },
+        )
         return tag["href"] if tag else None
 
     @property
@@ -215,7 +228,9 @@ class AppStoreApplication:
 
     @property
     def subtitle(self) -> str:
-        tag = self.soup.find("h2", class_="product-header__subtitle app-header__subtitle")
+        tag = self.soup.find(
+            "h2", class_="product-header__subtitle app-header__subtitle"
+        )
         return tag.text.strip() if tag else None
 
     @property
@@ -261,13 +276,17 @@ class AppStoreApplication:
         if not price_history:
             price_history_str = "n/a"
         else:
-            price_history_str = "\n".join(["  "] + [f"  * {item}  " for item in price_history])
+            price_history_str = "\n".join(
+                ["  "] + [f"  * {item}  " for item in price_history]
+            )
 
         # == Privacy Cards ================================
         if len(privacy_cards) == 1 and len(privacy_cards[0].items) == 0:
             privacy_cards_str = f"{privacy_cards[0].title}  "
         else:
-            privacy_cards_str = "\n".join(["  "] + [f"  * {card}  " for card in privacy_cards])
+            privacy_cards_str = "\n".join(
+                ["  "] + [f"  * {card}  " for card in privacy_cards]
+            )
 
         return TEMPLATE.format(
             title=self.title,

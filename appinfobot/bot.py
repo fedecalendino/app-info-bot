@@ -4,73 +4,65 @@ from urllib import parse
 
 from praw.models import Submission
 
-from appinfobot.reddit import reddit
 from appinfobot.config import REDDIT_SUBREDDITS
+from appinfobot.reddit import reddit
 from appinfobot.stores import SUPPORTED_STORES
-from appinfobot import filters
 
 logger = logging.getLogger(__name__)
 
 
-def analyze_submission(submission: Submission):
-    logger.info("Found %s app", submission.url)
+def find_comment(submission: Submission):
+    for comment in submission.comments:
+        if comment.author == reddit.user.me():
+            return comment
 
+    return None
+
+
+def analyze_submission(submission: Submission):
     url = parse.urlsplit(submission.url)
+
+    if url.hostname not in SUPPORTED_STORES:
+        logger.info("found invalid submission (%s)", submission.url)
+        return
+
+    logger.info("found valid submission (%s)", submission.url)
+
     scraper = SUPPORTED_STORES.get(url.hostname)
     info = scraper(url.geturl())
 
-    logger.info("Fetched information for %s from %s", info.title, info.store)
+    logger.info("fetched information for %s (%s)", info.title, info.store)
 
-    submission.reply(body=str(info))
-    logger.info("Replied to %s", submission.permalink)
+    comment = find_comment(submission)
+
+    if comment:
+        comment.edit(body=str(info))
+        logger.info("updated comment (%s)", comment.permalink)
+    else:
+        comment = submission.reply(body=str(info))
+        logger.info("replied with comment (%s)", comment.permalink)
 
 
 def analyze_subreddit(subreddit: str) -> dict:
-    logger.info("Looking for posts in /r/%s", subreddit)
+    logger.info("looking for submissions in /r/%s", subreddit)
 
     result = {
-        "analyzed": [],
-        "is_old": [],
-        "is_self": [],
-        "is_unsupported": [],
-        "was_analyzed": [],
         "errors": [],
-        "upvoted": [],
     }
 
-    for submission in list(reddit.subreddit(subreddit).new(limit=10)):
+    for submission in list(reddit.subreddit(subreddit).new(limit=15)):
         data = {"id": submission.id, "title": submission.title}
 
-        if filters.is_self(submission):
-            result["is_self"].append(data)
-            continue
-
-        if filters.is_old(submission):
-            result["is_old"].append(data)
-            continue
-
-        if filters.is_unsupported(submission):
-            result["is_unsupported"].append(data)
-            continue
-
-        if filters.was_analyzed(submission):
-            submission.upvote()
-            result["was_analyzed"].append(data)
-            result["upvoted"].append(data)
+        if submission.is_self:
             continue
 
         try:
             analyze_submission(submission)
-            sleep(1)
-
-            submission.upvote()
-            result["analyzed"].append(data)
-            result["upvoted"].append(data)
         except Exception as exc:
-            data["error"] = str(exc)
-
-            logging.error(exc, exc_info=True)
             result["errors"].append(data)
+            logging.error(exc, exc_info=True)
+
+        sleep(1)
 
     return result
 
