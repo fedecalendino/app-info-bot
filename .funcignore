@@ -1,0 +1,9 @@
+.git*
+
+local.settings.json
+test
+
+.idea
+.vscode
+
+.venv
