@@ -7,7 +7,7 @@ from praw.models import Submission
 from appinfobot.reddit import reddit
 from appinfobot.config import REDDIT_SUBREDDITS
 from appinfobot.stores import SUPPORTED_STORES
-from . import filters
+from appinfobot import filters
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ def analyze_subreddit(subreddit: str) -> dict:
         "is_unsupported": [],
         "was_analyzed": [],
         "errors": [],
+        "upvoted": [],
     }
 
     for submission in list(reddit.subreddit(subreddit).new(limit=10)):
@@ -53,14 +54,18 @@ def analyze_subreddit(subreddit: str) -> dict:
             continue
 
         if filters.was_analyzed(submission):
+            submission.upvote()
             result["was_analyzed"].append(data)
+            result["upvoted"].append(data)
             continue
 
         try:
             analyze_submission(submission)
             sleep(1)
 
+            submission.upvote()
             result["analyzed"].append(data)
+            result["upvoted"].append(data)
         except Exception as exc:
             data["error"] = str(exc)
 
