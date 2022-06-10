@@ -1,7 +1,7 @@
 import azure.functions as func
 
-from appinfobot import bot
+from appinfobot import jobs
 
 
 def main(mytimer: func.TimerRequest) -> None:
-    bot.run()
+    jobs.check()

@@ -4,7 +4,6 @@ from urllib import parse
 
 from praw.models import Submission
 
-from appinfobot.config import REDDIT_SUBREDDITS
 from appinfobot.reddit import reddit
 from appinfobot.stores import SUPPORTED_STORES
 
@@ -32,7 +31,7 @@ def analyze_submission(submission: Submission):
 
     comment = find_comment(submission)
 
-    if comment.edited:
+    if comment and comment.edited:
         logger.info(" * skipped old submission (%s)", submission.url)
         return
 
@@ -69,16 +68,4 @@ def analyze_subreddit(subreddit: str) -> dict:
             result["errors"].append(data)
             logging.error(exc, exc_info=True)
 
-    return result
-
-
-def run() -> dict:
-    result = {}
-
-    logger.info("analyzing: " + " ".join(REDDIT_SUBREDDITS))
-
-    for subreddit in REDDIT_SUBREDDITS:
-        result[subreddit] = analyze_subreddit(subreddit)
-
-    logger.info("finished...")
     return result
