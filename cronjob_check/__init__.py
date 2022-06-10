@@ -1,6 +1,6 @@
 import azure.functions as func
 
-from appinfobot import jobs
+from app import jobs
 
 
 def main(mytimer: func.TimerRequest) -> None:

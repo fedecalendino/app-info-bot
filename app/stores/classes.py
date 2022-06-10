@@ -1,4 +1,4 @@
-from appinfobot.utils import fancy_join
+from app.utils import fancy_join
 
 
 class Developer:

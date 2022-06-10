@@ -1,6 +1,6 @@
 from praw import Reddit
 
-from appinfobot import config
+from app import config
 
 reddit = Reddit(
     client_id=config.REDDIT_CLIENTID,

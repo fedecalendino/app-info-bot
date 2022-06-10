@@ -1,3 +1,3 @@
-# from appinfobot import jobs
+# from app import jobs
 #
 # jobs.check()

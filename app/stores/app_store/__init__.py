@@ -5,8 +5,8 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 
-from appinfobot import config
-from appinfobot.stores.classes import (
+from app import config
+from app.stores.classes import (
     Developer,
     Price,
     PrivacyCard,

@@ -4,8 +4,8 @@ from urllib import parse
 
 from praw.models import Submission
 
-from appinfobot.reddit import reddit
-from appinfobot.stores import SUPPORTED_STORES
+from app.reddit import reddit
+from app.stores import SUPPORTED_STORES
 
 logger = logging.getLogger(__name__)
 

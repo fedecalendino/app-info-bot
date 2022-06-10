@@ -1,4 +1,4 @@
-from appinfobot.stores.app_store import AppStoreApplication
+from app.stores.app_store import AppStoreApplication
 
 
 SUPPORTED_STORES = {

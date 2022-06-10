@@ -1,6 +1,6 @@
 import logging
 
-from appinfobot.config import REDDIT_SUBREDDITS
+from app.config import REDDIT_SUBREDDITS
 from . import bot
 
 logger = logging.getLogger(__name__)
