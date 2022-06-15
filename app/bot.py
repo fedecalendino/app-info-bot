@@ -31,9 +31,9 @@ def analyze_submission(submission: Submission):
 
     comment = find_comment(submission)
 
-    if comment and comment.edited:
-        logger.info(" * skipped old submission (%s)", submission.url)
-        return
+    # if comment and comment.edited:
+    #     logger.info(" * skipped old submission (%s)", submission.url)
+    #     return
 
     logger.info(" * found valid submission (%s)", submission.url)
 
@@ -59,7 +59,7 @@ def analyze_subreddit(subreddit: str) -> dict:
         "errors": [],
     }
 
-    for submission in list(reddit.subreddit(subreddit).new(limit=5)):
+    for submission in list(reddit.subreddit(subreddit).new(limit=3)):
         data = {"id": submission.id, "title": submission.title}
 
         try:
