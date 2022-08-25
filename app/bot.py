@@ -12,8 +12,11 @@ logger = logging.getLogger(__name__)
 
 def find_comment(submission: Submission):
     for comment in submission.comments:
-        if comment.author_fullname == reddit.user.me().fullname:
-            return comment
+        try:
+            if comment.author_fullname == reddit.user.me().fullname:
+                return comment
+        except:  # fix for deleted comments by mods.
+            continue
 
     return None
 

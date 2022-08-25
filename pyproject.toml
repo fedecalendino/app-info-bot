@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "app-info-bot"
+version = "1.0.0"
+description = "Reddit bot for posting information about apps."
+authors = ["Fede Calendino <fede@calendino.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+azure-functions = "^1.11.2"
+beautifulsoup4 = "^4.11.1"
+praw = "^7.6.0"
+requests = "^2.28.1"
+
+[tool.poetry.dev-dependencies]
+black = "^22.6.0"
+ddt = "^1.6.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
