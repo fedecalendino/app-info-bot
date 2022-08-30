@@ -142,7 +142,19 @@ class AppStoreApplication:
         )
 
     @property
+    def pre_order(self) -> bool:
+        return (
+            self.soup.find(
+                "li", class_="inline-list__item app-header__list__item--preorder"
+            )
+            is not None
+        )
+
+    @property
     def iaps(self) -> list[Price]:
+        if self.pre_order:
+            return [Price("Pre-Orders might not show IAPs properly", "⚠️")]
+
         tag = self.soup.find("dt", text="In-App Purchases")
 
         if not tag:
