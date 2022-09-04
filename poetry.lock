@@ -7,7 +7,7 @@ optional = false
 python-versions = "*"
 
 [package.extras]
-dev = ["coverage", "requests (>=2.0.0,<3.0.0)", "pytest-cov", "pytest", "mypy", "flake8 (>=4.0.1,<4.1.0)"]
+dev = ["coverage", "flake8 (>=4.0.1,<4.1.0)", "mypy", "pytest", "pytest-cov", "requests (>=2.0.0,<3.0.0)"]
 
 [[package]]
 name = "beautifulsoup4"
@@ -125,8 +125,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)", "sphinx (>=4)"]
-test = ["appdirs (==1.4.4)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)", "pytest (>=6)"]
+docs = ["furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx (>=4)", "sphinx-autodoc-typehints (>=1.12)"]
+test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
 
 [[package]]
 name = "praw"
@@ -143,7 +143,7 @@ websocket-client = ">=0.54.0"
 
 [package.extras]
 ci = ["coveralls"]
-dev = ["packaging", "pre-commit", "sphinx", "sphinx-rtd-theme", "betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)"]
+dev = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "packaging", "pre-commit", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)", "sphinx", "sphinx-rtd-theme"]
 lint = ["pre-commit", "sphinx", "sphinx-rtd-theme"]
 readthedocs = ["sphinx", "sphinx-rtd-theme"]
 test = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)"]
@@ -160,10 +160,10 @@ python-versions = "~=3.6"
 requests = ">=2.6.0,<3.0"
 
 [package.extras]
-test = ["testfixtures (>4.13.2,<7)", "pytest", "mock (>=0.8)", "betamax-serializers (>=0.2.0,<0.3)", "betamax-matchers (>=0.4.0,<0.5)", "betamax (>=0.8,<0.9)"]
-lint = ["flynt", "pydocstyle", "pre-commit", "flake8", "black"]
-dev = ["testfixtures (>4.13.2,<7)", "pytest", "mock (>=0.8)", "betamax-serializers (>=0.2.0,<0.3)", "betamax-matchers (>=0.4.0,<0.5)", "betamax (>=0.8,<0.9)", "flynt", "pydocstyle", "pre-commit", "flake8", "black"]
 ci = ["coveralls"]
+dev = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.4.0,<0.5)", "betamax-serializers (>=0.2.0,<0.3)", "black", "flake8", "flynt", "mock (>=0.8)", "pre-commit", "pydocstyle", "pytest", "testfixtures (>4.13.2,<7)"]
+lint = ["black", "flake8", "flynt", "pre-commit", "pydocstyle"]
+test = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.4.0,<0.5)", "betamax-serializers (>=0.2.0,<0.3)", "mock (>=0.8)", "pytest", "testfixtures (>4.13.2,<7)"]
 
 [[package]]
 name = "requests"
@@ -182,6 +182,17 @@ urllib3 = ">=1.21.1,<1.27"
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
+
+[[package]]
+name = "slack-hooks"
+version = "0.4.1"
+description = "Slack client for webhooks with Block Kit builder."
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[package.dependencies]
+requests = ">=2.28.1,<3.0.0"
 
 [[package]]
 name = "soupsieve"
@@ -232,8 +243,8 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4"
 
 [package.extras]
-brotli = ["brotlicffi (>=0.8.0)", "brotli (>=1.0.9)", "brotlipy (>=0.6.0)"]
-secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
@@ -252,7 +263,7 @@ test = ["websockets"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2abdcc9ce2f9b71ca750b0d2533df037773a26626d85ca40794e3b7f514d8d2b"
+content-hash = "0149be7154451943f5b78ff13cb13095231a70fda6f077f89d4f5f403311ae87"
 
 [metadata.files]
 azure-functions = [
@@ -335,6 +346,10 @@ prawcore = [
 requests = [
     {file = "requests-2.28.1-py3-none-any.whl", hash = "sha256:8fefa2a1a1365bf5520aac41836fbee479da67864514bdb821f31ce07ce65349"},
     {file = "requests-2.28.1.tar.gz", hash = "sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983"},
+]
+slack-hooks = [
+    {file = "slack-hooks-0.4.1.tar.gz", hash = "sha256:c2207f07a04c1d10c4c6221576ab5ada73ca5acad86b5df07ef1d93a31c40f21"},
+    {file = "slack_hooks-0.4.1-py3-none-any.whl", hash = "sha256:dee4cb0d66d03c83867fb8d6f22376096471c9f26be02918e7ad4a5c86b2bf2a"},
 ]
 soupsieve = [
     {file = "soupsieve-2.3.2.post1-py3-none-any.whl", hash = "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759"},
