@@ -1,7 +1,7 @@
 import azure.functions as func
 
-from app import jobs
+from app.jobs.check import CheckJob
 
 
 def main(mytimer: func.TimerRequest) -> None:
-    jobs.run()
+    CheckJob().run()

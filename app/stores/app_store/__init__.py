@@ -5,7 +5,7 @@ from urllib import parse
 import requests
 from bs4 import BeautifulSoup
 
-from app import config
+from app import settings
 from app.stores.classes import (
     Developer,
     Price,
@@ -320,6 +320,6 @@ class AppStoreApplication:
             iaps=iaps_str,
             privacy_policy=self.privacy_policy,
             privacy_cards=privacy_cards_str,
-            github=config.URL_GITHUB_REPOSITORY,
-            dev=config.URL_REDDIT_DEV,
+            github=settings.URL_GITHUB_REPOSITORY,
+            dev=settings.URL_REDDIT_DEV,
         )

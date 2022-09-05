@@ -1,13 +1,13 @@
 from praw import Reddit
 
-from app import config
+from app import settings
 
 reddit = Reddit(
-    client_id=config.REDDIT_CLIENTID,
-    client_secret=config.REDDIT_CLIENTSECRET,
-    user_agent=config.REDDIT_USERAGENT,
-    username=config.REDDIT_USERNAME,
-    password=config.REDDIT_PASSWORD,
+    client_id=settings.REDDIT_CLIENTID,
+    client_secret=settings.REDDIT_CLIENTSECRET,
+    user_agent=settings.REDDIT_USERAGENT,
+    username=settings.REDDIT_USERNAME,
+    password=settings.REDDIT_PASSWORD,
 )
 
-assert reddit.user.me().name == config.REDDIT_USERNAME
+assert reddit.user.me().name == settings.REDDIT_USERNAME
